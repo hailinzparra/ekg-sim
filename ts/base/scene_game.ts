@@ -70,7 +70,7 @@ scene_game.render = () => {
 
 scene_game.render_ui = () => {
     if (main_lead && sa_node) {
-        main_lead.draw_ekg_box(sa_node, stage.w - grid_size * 6.5, stage.mid.h - grid_size * 2.5, grid_size * 6, grid_size * 5)
+        main_lead.draw_ekg_box(sa_node, stage.w - grid_size * 9.5, stage.mid.h - grid_size * 5, grid_size * 9, grid_size * 10)
     }
 
     draw_debug()

@@ -5,6 +5,9 @@ class HeartNode extends CoreObject {
     vec_polar: CoreVec2
     color: string = 'red'
     recorded_amplitude: number[] = [0]
+    can_record: boolean = true
+    record_alarm: Alarm = new Alarm(16)
+    ekg_column_amount: number = 100
     constructor(
         name: string, x: number, y: number, size: number,
         vec_polar: CoreVec2, color?: string
@@ -15,6 +18,12 @@ class HeartNode extends CoreObject {
         this.circle_mask_r = this.size
         this.vec_polar = vec_polar
         if (color) this.color = color
+        this.record_alarm.on_alarm(() => {
+            this.can_record = true
+        })
+    }
+    pre_update(): void {
+        this.record_alarm.update()
     }
     intersect_circle(x: number, y: number, r: number) {
         return Math.hypot(this.x - x, this.y - y) < this.circle_mask_r + r
@@ -68,9 +77,14 @@ class HeartNode extends CoreObject {
         draw.set_color('white')
         draw.rect(x, y, w, h, true)
 
-        this.recorded_amplitude.push(Math.round(this.vec_polar.dot(target_node.vec_polar) / grid_size / 100) / 10 * target_node.vec_polar.get_length())
+        if (this.can_record) {
+            console.log('recording')
+            this.recorded_amplitude.push(Math.round(this.vec_polar.dot(target_node.vec_polar) / grid_size / 100) / 10 * target_node.vec_polar.get_length())
+            this.can_record = false
+            this.record_alarm.restart()
+        }
 
-        if (this.recorded_amplitude.length > 10) {
+        if (this.recorded_amplitude.length > this.ekg_column_amount) {
             this.recorded_amplitude.shift()
         }
 
@@ -81,9 +95,8 @@ class HeartNode extends CoreObject {
         draw.ctx.beginPath()
         draw.ctx.moveTo(x, y + h / 2 - this.recorded_amplitude[0])
         for (let i = 1; i < this.recorded_amplitude.length; i++) {
-            draw.ctx.lineTo(x + i * w / 9, y + h / 2 - this.recorded_amplitude[i])
+            draw.ctx.lineTo(x + i * w / (this.ekg_column_amount - 1), y + h / 2 - this.recorded_amplitude[i])
         }
-        console.log(this.recorded_amplitude)
         draw.ctx.stroke()
     }
 }
