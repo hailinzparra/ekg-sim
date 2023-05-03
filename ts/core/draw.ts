@@ -1,7 +1,4 @@
 interface CoreDraw {
-    TWO_PI: number
-    DEG_TO_RAD: number
-    RAD_TO_DEG: number
     ctx: CanvasRenderingContext2D
     text_height: number
     images: { [name: string]: { origin: CoreVec2, image: HTMLImageElement } }
@@ -55,9 +52,6 @@ interface CoreDraw {
 }
 
 core.draw = {
-    TWO_PI: 2 * Math.PI,
-    DEG_TO_RAD: Math.PI / 180,
-    RAD_TO_DEG: 180 / Math.PI,
     ctx: core.stage.canvas.getContext('2d')!,
     text_height: 10,
     images: {},
@@ -132,7 +126,7 @@ core.draw = {
     reset_alpha() {
         this.ctx.globalAlpha = 1
     },
-    image_el(img, x, y, origin = CoreVec2.half) {
+    image_el(img, x, y, origin = new CoreVec2(0.5, 0.5)) {
         x -= img.width * origin.x
         y -= img.height * origin.y
         this.ctx.drawImage(img, x, y)
@@ -170,13 +164,13 @@ core.draw = {
     },
     circle(x, y, r, is_stroke = false) {
         this.ctx.beginPath()
-        this.ctx.arc(x, y, r, 0, this.TWO_PI)
+        this.ctx.arc(x, y, r, 0, G_CORE_MATH_TWO_PI)
         this.draw(is_stroke)
     },
     on_transform(x, y, xscale, yscale, angle_deg, draw_fn) {
         this.ctx.save()
         this.ctx.translate(x, y)
-        this.ctx.rotate(angle_deg * this.DEG_TO_RAD)
+        this.ctx.rotate(angle_deg * G_CORE_MATH_DEG_TO_RAD)
         this.ctx.scale(xscale, yscale)
         draw_fn()
         this.ctx.restore()

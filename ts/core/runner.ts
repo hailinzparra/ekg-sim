@@ -8,14 +8,13 @@ interface CoreRunner {
 core.runner = {
     is_running: false,
     step(t = 0) {
-        core.debug.update()
         core.time.update(t)
         core.scene.update()
         if (!core.scene.current_scene.is_obj_update_disabled) {
             core.obj.update_all()
         }
         if (core.scene.current_scene.is_auto_clear_stage) {
-            core.stage.clear()
+            core.stage.clear_canvas()
         }
         core.scene.render()
         if (!core.scene.current_scene.is_obj_render_disabled) {

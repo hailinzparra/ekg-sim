@@ -1,7 +1,12 @@
 const {
+    events,
+    math,
+    common,
+    dom,
     stage,
     input,
     time,
+    font,
     draw,
     scene,
     obj,
