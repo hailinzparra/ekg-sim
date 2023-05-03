@@ -42,6 +42,7 @@ const scene_playground = new CoreScene<ScenePlaygroundProps>('Playground', {
     main_box_selection_logic() {
         if (input.pointer_down() || input.pointer_hold()) {
             for (const box of obj.take<EKGBox>('ekg_box')) {
+                if (box === this.ekg_box_main) continue
                 if (this.point_inside_ekg_box(input.pointer_position, box)) {
                     this.ekg_box_main.lead = box.lead
                     this.ekg_box_main.name = box.name
@@ -53,7 +54,8 @@ const scene_playground = new CoreScene<ScenePlaygroundProps>('Playground', {
         draw.set_color('#000')
         const main = this.ekg_box_main
         for (const box of obj.take<EKGBox>('ekg_box')) {
-            if (box !== main && box.lead === main.lead && box.name === main.name) {
+            if (box === main) continue
+            if (box.lead === main.lead && box.name === main.name) {
                 draw.rect(box.x, box.y - box.height / 2, box.width, box.height, true)
             }
         }
