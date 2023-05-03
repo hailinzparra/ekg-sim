@@ -19,8 +19,9 @@
 
 'base/alias'
 'base/globals'
-'base/objects/ekg_box'
+'base/objects/heart_node'
 'base/objects/ekg_lead'
+'base/objects/ekg_box'
 'base/scenes/login'
 'base/scenes/loading'
 'base/scenes/playground'

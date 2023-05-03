@@ -1,15 +1,20 @@
 interface CoreTime {
     t: number
+    dt: number
+    cdt: number
     udt: number
     pt: number
     fps: number
-    dt: number
     update(t: number): void
 }
 
 core.time = {
     t: 0,
     dt: 0,
+    /**
+     * Clamped delta time (0-1)
+     */
+    cdt: 0,
     /**
      * Unscaled delta time
      */
@@ -25,5 +30,6 @@ core.time = {
         this.udt = this.t - this.pt
         this.fps = 1000 / this.udt
         this.dt = this.udt / (1000 / G_CORE_TIME_BASE_FPS)
+        this.cdt = Math.min(1, this.dt)
     },
 }

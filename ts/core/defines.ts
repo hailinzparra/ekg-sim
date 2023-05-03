@@ -1,5 +1,7 @@
 declare const __PROD: boolean
 
+type ValueOf<T> = T[keyof T]
+
 interface ObjectOf<T> {
     [name: string]: T
 }
@@ -8,3 +10,8 @@ const CORE_INPUT_KEY_STATUS_TEXT_IDLE = 'IDLE'
 const CORE_INPUT_KEY_STATUS_TEXT_HELD = 'HELD'
 const CORE_INPUT_KEY_STATUS_TEXT_PRESSED = 'PRESSED'
 const CORE_INPUT_KEY_STATUS_TEXT_RELEASED = 'RELEASED'
+
+const CORE_DRAW_IMAGE_TYPE_IMAGE = 'IMAGE'
+const CORE_DRAW_IMAGE_TYPE_STRIP = 'STRIP'
+
+type CoreDrawImageType = typeof CORE_DRAW_IMAGE_TYPE_IMAGE | typeof CORE_DRAW_IMAGE_TYPE_STRIP

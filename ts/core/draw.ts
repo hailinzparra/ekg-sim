@@ -1,17 +1,22 @@
+interface CoreDrawImage {
+    origin: CoreVec2
+    image: HTMLImageElement
+}
+
+interface CoreDrawStrip {
+    origin: CoreVec2
+    image: HTMLImageElement
+    image_number: number
+    image_per_row: number
+    image_width: number
+    image_height: number
+}
+
 interface CoreDraw {
     ctx: CanvasRenderingContext2D
     text_height: number
-    images: { [name: string]: { origin: CoreVec2, image: HTMLImageElement } }
-    strips: {
-        [name: string]: {
-            origin: CoreVec2,
-            image: HTMLImageElement,
-            image_number: number,
-            image_per_row: number,
-            image_width: number,
-            image_height: number,
-        }
-    }
+    images: { [name: string]: CoreDrawImage }
+    strips: { [name: string]: CoreDrawStrip }
     set_color(fill: string, stroke?: string): void
     set_font(font: CoreFont, overrides?: {
         size?: CoreFont['size']
@@ -154,7 +159,6 @@ core.draw = {
         this.ctx.beginPath()
         this.ctx.moveTo(x1, y1)
         this.ctx.lineTo(x2, y2)
-        this.ctx.closePath()
         this.ctx.stroke()
     },
     rect(x, y, w, h, is_stroke = false) {

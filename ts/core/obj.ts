@@ -14,6 +14,7 @@ interface CoreObjectManager {
     take<T = CoreObject>(...names: string[]): T[]
     get<T = CoreObject>(id: number): T | null
     remove(id: number): CoreObject | null
+    clear(name: string): void
     clear_all(): void
     nearest<T = CoreObject>(name: string, x: number, y: number): T | null
 }
@@ -75,17 +76,64 @@ class CoreGameObjectAlarm {
     }
 }
 
+class CoreGameObjectMaskRect {
+    constructor(
+        public mask_parent: CoreGameObjectMask,
+        public offset: CoreVec2,
+        public size: CoreVec2,
+    ) { }
+    contains_point(p: CoreVec2) {
+        const rect = this.mask_parent.parent.position.clone().add(this.offset)
+        return p.x > rect.x && p.x < rect.x + this.size.x
+            && p.y > rect.y && p.y < rect.y + this.size.y
+    }
+}
+
+class CoreGameObjectMaskCircle {
+    constructor(
+        public mask_parent: CoreGameObjectMask,
+        public offset: CoreVec2,
+        public r: number,
+    ) { }
+    contains_point(p: CoreVec2) {
+        const pp = this.mask_parent.parent.position.clone().add(this.offset)
+        return core.math.distance(p.x, p.y, pp.x, pp.y) < this.r
+    }
+}
+
+class CoreGameObjectMask {
+    constructor(
+        public parent: CoreGameObject,
+        public children: (CoreGameObjectMaskRect | CoreGameObjectMaskCircle)[] = [],
+    ) { }
+    contains_point(p: CoreVec2): boolean {
+        for (const m of this.children) {
+            if (m.contains_point(p)) return true
+        }
+        return false
+    }
+}
+
 class CoreGameObject extends CoreObject {
     position: CoreVec2
     /**
      * Recorded position at the start of pre update before calling `before_update`
      */
     previous_position: CoreVec2
+    scale: CoreVec2
     alarms: { [name: string]: CoreGameObjectAlarm } = {}
-    constructor(position: CoreVec2) {
+    image_name: string = ''
+    image_index: number = 0
+    image_speed: number = 1
+    float_image_index: number = 0
+    image_angle_deg: number = 0
+    image_alpha: number = 1
+    mask: CoreGameObjectMask = new CoreGameObjectMask(this)
+    constructor(position: CoreVec2, scale: CoreVec2 = CoreVec2.one) {
         super(position.x, position.y)
         this.position = position
         this.previous_position = new CoreVec2(this.position)
+        this.scale = scale
     }
     create_alarm(name: string, interval_ms: number, callback: Function) {
         this.alarms[name] = new CoreGameObjectAlarm(interval_ms)
@@ -112,7 +160,14 @@ class CoreGameObject extends CoreObject {
     post_update() {
         this.x = this.position.x
         this.y = this.position.y
+        this.pre_render()
         this.after_update()
+    }
+    set_image_angle(angle_deg: number) {
+        this.image_angle_deg = angle_deg
+    }
+    set_image_angle_rad(angle_rad: number) {
+        this.image_angle_deg = angle_rad * G_CORE_MATH_RAD_TO_DEG
     }
     /**
      * Returns true if current position plus given margin is outside of the stage
@@ -122,6 +177,45 @@ class CoreGameObject extends CoreObject {
             || this.position.x - xmargin > core.stage.size.x
             || this.position.y + ymargin < 0
             || this.position.y - ymargin > core.stage.size.y
+    }
+    get_image_type(): CoreDrawImageType | null {
+        if (core.draw.images[this.image_name]) return CORE_DRAW_IMAGE_TYPE_IMAGE
+        if (core.draw.strips[this.image_name]) return CORE_DRAW_IMAGE_TYPE_STRIP
+        return null
+    }
+    pre_render() {
+        if (this.get_image_type() === CORE_DRAW_IMAGE_TYPE_STRIP) {
+            this.float_image_index += core.time.dt * this.image_speed
+            this.image_index = Math.round(this.float_image_index) % (core.draw.strips[this.image_name]?.image_number || 0)
+        }
+    }
+    render() {
+        this.draw_self()
+    }
+    draw_self() {
+        if (this.get_image_type() === CORE_DRAW_IMAGE_TYPE_IMAGE) {
+            draw.image_ext(
+                this.image_name,
+                this.position.x,
+                this.position.y,
+                this.scale.x,
+                this.scale.y,
+                this.image_angle_deg,
+                this.image_alpha,
+            )
+        }
+        else if (this.get_image_type() === CORE_DRAW_IMAGE_TYPE_STRIP) {
+            draw.strip_ext(
+                this.image_name,
+                this.image_index,
+                this.position.x,
+                this.position.y,
+                this.scale.x,
+                this.scale.y,
+                this.image_angle_deg,
+                this.image_alpha,
+            )
+        }
     }
 }
 
@@ -211,6 +305,9 @@ core.obj = {
             }
         }
         return null
+    },
+    clear(name) {
+        this.instances[this.get_index(name)].length = 0
     },
     clear_all() {
         for (let i = this.instances.length - 1; i >= 0; i--) {
