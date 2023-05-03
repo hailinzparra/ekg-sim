@@ -20,6 +20,7 @@
 'base/alias'
 'base/globals'
 'base/objects/ekg_box'
+'base/objects/ekg_lead'
 'base/scenes/login'
 'base/scenes/loading'
 'base/scenes/playground'

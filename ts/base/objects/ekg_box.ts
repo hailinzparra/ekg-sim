@@ -8,6 +8,8 @@ class EKGBox extends CoreObject {
     large_box_xamount: number = 0
     large_box_yamount: number = 0
 
+    lead: EKGLead | null = null
+
     constructor(
         public name: string,
     ) {
@@ -79,6 +81,10 @@ class EKGBox extends CoreObject {
         draw.text(this.x + this.small_box_size, this.y + this.small_box_size, this.name)
     }
 
+    draw_lead() {
+        if (this.lead === null) return
+    }
+
     render(): void {
         draw.set_color('#edbac7')
         this.draw_small_box()
@@ -87,6 +93,7 @@ class EKGBox extends CoreObject {
         this.draw_border()
         draw.set_color('#000')
         this.draw_name()
+        this.draw_lead()
     }
 }
 
